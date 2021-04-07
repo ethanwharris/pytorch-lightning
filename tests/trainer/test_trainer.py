@@ -776,6 +776,34 @@ def test_disabled_validation(tmpdir):
     assert model.validation_epoch_end_invoked, "did not run `validation_epoch_end` with `fast_dev_run=True`"
 
 
+def test_no_return(tmpdir):
+    class CurrentModel(EvalModelTemplate):
+        def training_step(self, batch, batch_idx, optimizer_idx=None):
+            if batch_idx == 0:
+                print('hit')
+                return None
+            else:
+                return super().training_step(batch, batch_idx, optimizer_idx)
+
+        def validation_step(self, batch, batch_idx, *args, **kwargs):
+            if batch_idx == 0:
+                print('hit2')
+                return None
+            else:
+                return super().validation_step(batch, batch_idx, *args, **kwargs)
+
+    model = CurrentModel()
+
+    # fit model
+    trainer = Trainer(
+        default_root_dir=tmpdir,
+        limit_train_batches=2,
+        limit_val_batches=2,
+        max_epochs=1
+    )
+    trainer.fit(model)
+
+
 def test_nan_loss_detection(tmpdir):
 
     class CurrentModel(EvalModelTemplate):
