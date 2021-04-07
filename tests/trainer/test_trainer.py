@@ -777,20 +777,16 @@ def test_disabled_validation(tmpdir):
 
 
 def test_no_return(tmpdir):
+    """
+    Test training executes without error when training_step sometimes returns None
+    """
+
     class CurrentModel(EvalModelTemplate):
         def training_step(self, batch, batch_idx, optimizer_idx=None):
-            if batch_idx == 0:
-                print('hit')
+            if (batch_idx % 2) == 0:
                 return None
             else:
                 return super().training_step(batch, batch_idx, optimizer_idx)
-
-        def validation_step(self, batch, batch_idx, *args, **kwargs):
-            if batch_idx == 0:
-                print('hit2')
-                return None
-            else:
-                return super().validation_step(batch, batch_idx, *args, **kwargs)
 
     model = CurrentModel()
 
@@ -801,6 +797,7 @@ def test_no_return(tmpdir):
         limit_val_batches=2,
         max_epochs=1
     )
+    
     trainer.fit(model)
 
 
