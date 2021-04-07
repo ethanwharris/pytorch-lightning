@@ -797,7 +797,7 @@ def test_no_return(tmpdir):
         limit_val_batches=2,
         max_epochs=1
     )
-    
+
     trainer.fit(model)
 
 
